@@ -1,0 +1,20 @@
+﻿<h2>Đăng ký</h2>
+
+<form method="post">
+    <input name="username" class="form-control mb-2" placeholder="Username" />
+    <input name="email" class="form-control mb-2" placeholder="Email" />
+    <input type="password" name="password" class="form-control mb-2" placeholder="Password" />
+
+    <div class="d-flex align-items-center">
+        <!-- Button đăng ký -->
+        <button type="submit" class="btn btn-primary me-2">Đăng ký</button>
+
+        <!-- Button quay lại đăng nhập -->
+        <a asp-action="Login" class="btn btn-secondary">Quay lại Đăng nhập</a>
+    </div>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <p class="text-danger mt-2">@ViewBag.Error</p>
+}

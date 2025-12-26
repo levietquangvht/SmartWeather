@@ -1,0 +1,173 @@
+﻿@model SmartWeather.Models.WeatherResponse
+
+@{
+    ViewData["Title"] = "Dự báo thời tiết";
+    var favoriteWeathers = ViewBag.FavoriteWeathers as List<SmartWeather.Models.WeatherResponse>;
+}
+
+<h2 class="mb-4 text-primary">🌤️ Dự báo thời tiết</h2>
+
+<!-- ========================= -->
+<!-- FORM TÌM THỜI TIẾT -->
+<!-- ========================= -->
+<form method="post" asp-action="GetWeather" class="row g-3 mb-4">
+    <div class="col-md-6 position-relative">
+
+        <input type="text"
+               id="cityInput"
+               name="city"
+               class="form-control form-control-lg"
+               placeholder="Nhập tên thành phố"
+               value="@ViewBag.City"
+               autocomplete="off"
+               required />
+
+        <!-- AUTOCOMPLETE LIST -->
+        <ul id="citySuggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 1000;"></ul>
+
+    </div>
+
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+            🔍 Xem thời tiết
+        </button>
+    </div>
+</form>
+
+<!-- ========================= -->
+<!-- THÔNG BÁO LỖI -->
+<!-- ========================= -->
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<!-- ========================= -->
+<!-- KẾT QUẢ TÌM KIẾM -->
+<!-- ========================= -->
+@if (Model != null)
+{
+    <div class="card shadow-sm mb-4 weather-card">
+        <div class="card-body">
+            <h4 class="card-title text-success">
+                📍 @Model.Name
+            </h4>
+
+            <span class="badge bg-danger fs-6 mb-2">
+                🌡️ @Model.Main?.Temp °C
+            </span>
+
+            <p class="mt-2 mb-1">
+                📝 @Model.Weather?[0]?.Description
+            </p>
+
+            <p>
+                💧 Độ ẩm: <strong>@Model.Main?.Humidity%</strong>
+            </p>
+
+            @if (ViewBag.Username != null)
+            {
+                <form method="post" asp-action="AddFavorite">
+                    <input type="hidden" name="city" value="@Model.Name" />
+                    <button class="btn btn-outline-success">
+                        ⭐ Lưu vào yêu thích
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+}
+
+<!-- ========================= -->
+<!-- THÀNH PHỐ YÊU THÍCH -->
+<!-- ========================= -->
+@if (favoriteWeathers != null && favoriteWeathers.Any())
+{
+    <h4 class="mt-5 mb-3">❤️ Thành phố yêu thích</h4>
+
+    <div class="row">
+        @foreach (var weather in favoriteWeathers)
+        {
+            <div class="col-md-4">
+                <div class="card favorite-card shadow-sm mb-3">
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            📍 @weather.Name
+                        </h5>
+
+                        <span class="badge bg-primary">
+                            🌡️ @weather.Main?.Temp °C
+                        </span>
+
+                        <p class="mt-2 mb-1">
+                            📝 @weather.Weather?[0]?.Description
+                        </p>
+
+                        <form method="post" asp-action="RemoveFavorite" class="mt-2">
+                            <input type="hidden" name="city" value="@weather.Name" />
+                            <button class="btn btn-sm btn-outline-danger w-100">
+                                ❌ Xóa khỏi yêu thích
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- ========================= -->
+<!-- JAVASCRIPT AUTOCOMPLETE -->
+<!-- ========================= -->
+<script>
+    const input = document.getElementById("cityInput");
+    const list = document.getElementById("citySuggestions");
+    let timer = null;
+
+    input.addEventListener("input", () => {
+        clearTimeout(timer);
+
+        timer = setTimeout(async () => {
+            const q = input.value.trim();
+            list.innerHTML = "";
+
+            if (q.length < 1) return;
+
+            try {
+                const res = await fetch(`/api/weather/cities?q=${q}`);
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                data.forEach(city => {
+                    const li = document.createElement("li");
+                    li.className = "list-group-item list-group-item-action";
+                    li.style.cursor = "pointer";
+                    li.textContent = `${city.name}, ${city.country}`;
+
+                    li.onclick = () => {
+                        input.value = city.name;
+                        list.innerHTML = "";
+                    };
+
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }, 300); // debounce
+    });
+
+    // Ẩn gợi ý khi click ra ngoài
+    document.addEventListener("click", (e) => {
+        if (!input.contains(e.target)) {
+            list.innerHTML = "";
+        }
+    });
+</script>

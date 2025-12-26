@@ -1,0 +1,60 @@
+﻿@model List<SmartWeather.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<h2 class="mb-4 text-primary">👥 Danh sách người dùng</h2>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Thành phố yêu thích</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.Email</td>
+                <td>
+                    <span class="badge @(user.Role == "Admin" ? "bg-danger" : "bg-secondary")">
+                        @user.Role
+                    </span>
+                </td>
+                <td>
+                    @if (user.FavoriteCities.Any())
+                    {
+                        <ul class="mb-0">
+                            @foreach (var city in user.FavoriteCities)
+                            {
+                                <li>@city</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <em>Không có</em>
+                    }
+                </td>
+                <td>
+                    <form method="post" asp-action="SetRole" class="d-inline">
+                        <input type="hidden" name="username" value="@user.Username" />
+                        <input type="hidden" name="role"
+                               value="@(user.Role == "Admin" ? "User" : "Admin")" />
+                        <button class="btn btn-sm btn-outline-primary">
+                            @(user.Role == "Admin" ? "Hạ quyền" : "Nâng Admin")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="/Admin" class="btn btn-secondary mt-3">⬅️ Quay lại Dashboard</a>

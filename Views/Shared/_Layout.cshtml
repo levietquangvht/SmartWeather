@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartWeather</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    @{
+        var username = Context.Session.GetString("User");
+        var role = Context.Session.GetString("Role");
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    🌤️ SmartWeather
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+
+                    <!-- ================= -->
+                    <!-- MENU TRÁI -->
+                    <!-- ================= -->
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Home" ? "active" : "")"
+                               asp-controller="Home" asp-action="Index">
+                                🏠 Home
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Weather" ? "active" : "")"
+                               asp-controller="Weather" asp-action="Index">
+                                ☁️ Dự báo thời tiết
+                            </a>
+                        </li>
+
+                        @* ⭐ CHỈ ADMIN MỚI THẤY *@
+                        @if (role == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Admin" ? "active text-warning" : "text-warning")"
+                                   asp-controller="Admin" asp-action="Index">
+                                    🛠️ Admin
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- ================= -->
+                    <!-- MENU PHẢI -->
+                    <!-- ================= -->
+                    <div class="d-flex align-items-center">
+                        @if (username != null)
+                        {
+                            <span class="navbar-text text-light me-3">
+                                👋 Xin chào, <strong>@username</strong>
+                                @if (role == "Admin")
+                                {
+                                    <span class="badge bg-warning text-dark ms-1">Admin</span>
+                                }
+                            </span>
+
+                            <a class="btn btn-outline-warning"
+                               asp-controller="Account" asp-action="Logout">
+                                🚪 Logout
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-light me-2"
+                               asp-controller="Account" asp-action="Login">
+                                🔐 Login
+                            </a>
+
+                            <a class="btn btn-warning"
+                               asp-controller="Account" asp-action="Register">
+                                📝 Register
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ================= -->
+    <!-- MAIN CONTENT -->
+    <!-- ================= -->
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <!-- ================= -->
+    <!-- FOOTER -->
+    <!-- ================= -->
+    <footer class="border-top footer text-muted mt-5">
+        <div class="container text-center">
+            &copy; 2025 SmartWeather
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
